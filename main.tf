@@ -1,9 +1,10 @@
 locals {
-  firewall1_key        = "sea-vhub1-fw"
-  firewall1_name       = "fw1-pru-vwan"
-  firewall2_key        = "ea-vhub2-fw"
-  firewall2_name       = "fw2-pru-vwan"  
-  location            = "southeastasia"
+  firewall1_key       = "sea-vhub1-fw"
+  firewall1_name      = "fw1-pru-vwan"
+  firewall2_key       = "ea-vhub2-fw"
+  firewall2_name      = "fw2-pru-vwan"
+  location1           = "southeastasia"
+  location2           = "eastasia"
   resource_group_name = "rg-pru-vwan"
   tags = {
     environment = "avm-vwan-testing"
@@ -12,15 +13,15 @@ locals {
   virtual_hub1_key  = "sea-vhub1"
   virtual_hub1_name = "vhub1-pru-sea"
   virtual_hub2_key  = "ea-vhub2"
-  virtual_hub2_name = "vhub2-pru-ea"  
-  virtual_wan_name = "vwan-pru-sea"
+  virtual_hub2_name = "vhub2-pru-ea"
+  virtual_wan_name  = "vwan-pru-sea"
 }
 
 module "vwan_with_vhub" {
   source                         = "git::https://github.com/Azure/terraform-azurerm-avm-ptn-virtualwan?ref=v0.8.0"
   create_resource_group          = true
   resource_group_name            = local.resource_group_name
-  location                       = local.location
+  location                       = local.location1
   virtual_wan_name               = local.virtual_wan_name
   disable_vpn_encryption         = false
   allow_branch_to_branch_traffic = true
@@ -29,18 +30,18 @@ module "vwan_with_vhub" {
   virtual_hubs = {
     (local.virtual_hub1_key) = {
       name           = local.virtual_hub1_name
-      location       = local.location
+      location       = local.location1
       resource_group = local.resource_group_name
       address_prefix = "10.0.0.0/24"
       tags           = local.tags
     }
     (local.virtual_hub2_key) = {
       name           = local.virtual_hub2_name
-      location       = local.location
+      location       = local.location2
       resource_group = local.resource_group_name
       address_prefix = "10.1.0.0/24"
       tags           = local.tags
-    }    
+    }
   }
   firewalls = {
     (local.firewall1_key) = {
@@ -54,7 +55,7 @@ module "vwan_with_vhub" {
       sku_tier        = "Standard"
       name            = local.firewall2_name
       virtual_hub_key = local.virtual_hub2_key
-    }    
+    }
   }
   routing_intents = {
     "aue-vhub1-routing-intent" = {
@@ -62,7 +63,7 @@ module "vwan_with_vhub" {
       virtual_hub_key = local.virtual_hub1_key
       routing_policies = [{
         name                  = "aue-vhub1-routing-policy-private"
-        destinations          = ["PrivateTraffic"]
+        destinations          = ["PrivateTraffic", "Internet"]
         next_hop_firewall_key = local.firewall1_key
       }]
     }
@@ -71,9 +72,9 @@ module "vwan_with_vhub" {
       virtual_hub_key = local.virtual_hub2_key
       routing_policies = [{
         name                  = "aue-vhub2-routing-policy-private"
-        destinations          = ["PrivateTraffic"]
+        destinations          = ["PrivateTraffic", "Internet"]
         next_hop_firewall_key = local.firewall2_key
       }]
-    }    
+    }
   }
 }
