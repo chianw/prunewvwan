@@ -30,5 +30,6 @@ provider "azurerm" {
     }
   }
   use_oidc = true
+  # subscription_id = "68be2809-9674-447c-a43d-261ef2862c29"
 
 }

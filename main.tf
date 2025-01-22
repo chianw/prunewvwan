@@ -1,24 +1,19 @@
-resource "random_pet" "vvan_name" {
-  length    = 2
-  separator = "-"
-}
-
 locals {
-  firewall1_key        = "aue-vhub1-fw"
-  firewall1_name       = "fw1-avm-vwan-${random_pet.vvan_name.id}"
-  firewall2_key        = "aue-vhub2-fw"
-  firewall2_name       = "fw2-avm-vwan-${random_pet.vvan_name.id}"  
-  location            = "australiaeast"
-  resource_group_name = "rg-avm-vwan-${random_pet.vvan_name.id}"
+  firewall1_key        = "sea-vhub1-fw"
+  firewall1_name       = "fw1-pru-vwan"
+  firewall2_key        = "ea-vhub2-fw"
+  firewall2_name       = "fw2-pru-vwan"  
+  location            = "southeastasia"
+  resource_group_name = "rg-pru-vwan"
   tags = {
     environment = "avm-vwan-testing"
     deployment  = "terraform"
   }
-  virtual_hub1_key  = "aue-vhub1"
-  virtual_hub1_name = "vhub1-avm-vwan-${random_pet.vvan_name.id}"
-  virtual_hub2_key  = "aue-vhub2"
-  virtual_hub2_name = "vhub2-avm-vwan-${random_pet.vvan_name.id}"  
-  virtual_wan_name = "vwan-avm-vwan-${random_pet.vvan_name.id}"
+  virtual_hub1_key  = "sea-vhub1"
+  virtual_hub1_name = "vhub1-pru-sea"
+  virtual_hub2_key  = "ea-vhub2"
+  virtual_hub2_name = "vhub2-pru-ea"  
+  virtual_wan_name = "vwan-pru-sea"
 }
 
 module "vwan_with_vhub" {
