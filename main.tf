@@ -78,7 +78,7 @@ resource "azurerm_firewall_policy_rule_collection_group" "example" {
     action   = "Allow"
     rule {
       name                  = "network_rule_collection1_rule1"
-      protocols             = ["any"]
+      protocols             = ["Any"]
       source_addresses      = ["0.0.0.0/0"]
       destination_addresses = ["0.0.0.0/0"]
       destination_ports     = ["*"]
