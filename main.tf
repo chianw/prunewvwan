@@ -17,6 +17,42 @@ locals {
   virtual_wan_name  = "vwan-pru-sea"
 }
 
+
+module "firewall_policy" {
+  source              = "Azure/avm-res-network-firewallpolicy/azurerm"
+  version             = "0.3.2"
+  name                = "prufwpolicy"
+  location            = local.location1
+  resource_group_name = local.resource_group_name
+}
+
+module "rule_collection_group" {
+  source                                                   = "Azure/avm-res-network-firewallpolicy/azurerm//modules/rule_collection_groups"
+  version                                                  = "0.3.2"
+  firewall_policy_rule_collection_group_firewall_policy_id = module.firewall_policy.resource.id
+  firewall_policy_rule_collection_group_name               = "NetworkRuleCollectionGroup"
+  firewall_policy_rule_collection_group_priority           = 400
+  firewall_policy_rule_collection_group_network_rule_collection = [
+    {
+      action   = "Allow"
+      name     = "NetworkRuleCollection"
+      priority = 200
+      rule = [
+        {
+          name                  = "allowall"
+          description           = "AllowAll"
+          destination_addresses = ["0.0.0.0/0"]
+          destination_ports     = ["*"]
+          source_addresses      = ["0.0.0.0/0"]
+          protocols             = ["Any"]
+        }
+      ]
+    }
+  ]
+}
+
+
+
 module "vwan_with_vhub" {
   source                         = "git::https://github.com/Azure/terraform-azurerm-avm-ptn-virtualwan?ref=v0.8.0"
   create_resource_group          = true
@@ -45,16 +81,18 @@ module "vwan_with_vhub" {
   }
   firewalls = {
     (local.firewall1_key) = {
-      sku_name        = "AZFW_Hub"
-      sku_tier        = "Standard"
-      name            = local.firewall1_name
-      virtual_hub_key = local.virtual_hub1_key
+      sku_name           = "AZFW_Hub"
+      sku_tier           = "Standard"
+      name               = local.firewall1_name
+      virtual_hub_key    = local.virtual_hub1_key
+      firewall_policy_id = module.firewall_policy.resource.id
     }
     (local.firewall2_key) = {
-      sku_name        = "AZFW_Hub"
-      sku_tier        = "Standard"
-      name            = local.firewall2_name
-      virtual_hub_key = local.virtual_hub2_key
+      sku_name           = "AZFW_Hub"
+      sku_tier           = "Standard"
+      name               = local.firewall2_name
+      virtual_hub_key    = local.virtual_hub2_key
+      firewall_policy_id = module.firewall_policy.resource.id
     }
   }
   routing_intents = {
