@@ -17,13 +17,18 @@ locals {
   virtual_wan_name  = "vwan-pru-sea"
 }
 
+resource "azurerm_resource_group" "example" {
+  name     = local.resource_group_name
+  location = local.location1
+}
+
 
 module "firewall_policy" {
   source              = "Azure/avm-res-network-firewallpolicy/azurerm"
   version             = "0.3.2"
   name                = "prufwpolicy"
   location            = local.location1
-  resource_group_name = local.resource_group_name
+  resource_group_name = azurerm_resource_group.example.name
   depends_on          = [module.vwan_with_vhub]
 }
 
@@ -56,8 +61,8 @@ module "rule_collection_group" {
 
 module "vwan_with_vhub" {
   source                         = "git::https://github.com/Azure/terraform-azurerm-avm-ptn-virtualwan?ref=v0.8.0"
-  create_resource_group          = true
-  resource_group_name            = local.resource_group_name
+  create_resource_group          = false
+  resource_group_name            = azurerm_resource_group.example.name
   location                       = local.location1
   virtual_wan_name               = local.virtual_wan_name
   disable_vpn_encryption         = false
