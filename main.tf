@@ -24,6 +24,7 @@ module "firewall_policy" {
   name                = "prufwpolicy"
   location            = local.location1
   resource_group_name = local.resource_group_name
+  depends_on          = [module.vwan_with_vhub]
 }
 
 module "rule_collection_group" {
